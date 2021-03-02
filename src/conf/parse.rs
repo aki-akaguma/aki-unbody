@@ -11,20 +11,19 @@ include!("cmd.help.rs.txt");
 const DESCRIPTIONS_TEXT: &str = r#"
 output first or last n lines, like a head and tail of linux command.
 "#;
-const ARGUMENTS_TEXT: &str = r#""#;
-const EXAMPLES_TEXT: &str = r#""#;
 /*
 const ARGUMENTS_TEXT: &str = r#"Argument:
   <url>                     url to getting, protocol is http or ftp
 "#;
-
-const EXAMPLES_TEXT: &str = r#"Examples:
-  You  can specify multiple URLs or parts of URLs by writing part sets within braces as in:
-    curl "http://site.{one,two,three}.comn"
-  you can get sequences of alphanumeric series by using [] as in:
-    curl "ftp://ftp.example.com/file[1-100].txt"
-"#;
 */
+const EXAMPLES_TEXT: &str = r#"Examples:
+  Outputs first 2 lines:
+    cat file1.txt | aki-unbody --head 2
+  Outputs last 2 lines:
+    cat file1.txt | aki-unbody --tail 2
+  Outputs body, except for first 2 lines and last 2 lines:
+    cat file1.txt | aki-unbody --head 2 --tail 2 --inverse
+"#;
 //}}} TEXT
 
 //----------------------------------------------------------------------
@@ -43,8 +42,7 @@ fn usage_message(program: &str) -> String {
 fn help_message(program: &str) -> String {
     let ver = version_message(program);
     let usa = usage_message(env!("CARGO_PKG_NAME"));
-    [ &ver, "", &usa, DESCRIPTIONS_TEXT, OPTIONS_TEXT,
-        ARGUMENTS_TEXT, EXAMPLES_TEXT].join("\n")
+    [ &ver, "", &usa, DESCRIPTIONS_TEXT, OPTIONS_TEXT, EXAMPLES_TEXT].join("\n")
 }
 
 //----------------------------------------------------------------------
