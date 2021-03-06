@@ -6,10 +6,8 @@ use std::io::{BufRead, Write};
 pub fn run(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
     let r = if conf.flg_inverse {
         run_inverse(sioe, conf)
-    } else if conf.opt_head.is_some() && conf.opt_tail.is_none() {
-        run_only_head(sioe, conf)
     } else {
-        run_0(sioe, conf)
+        run_normal(sioe, conf)
     };
     if r.is_broken_pipe() {
         return Ok(());
@@ -17,29 +15,10 @@ pub fn run(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
     r
 }
 
-fn run_only_head(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
-    let max_head = conf.opt_head.unwrap();
-    //
-    for (curr_line_count, line) in sioe.pin().lock().lines().enumerate() {
-        if curr_line_count >= max_head {
-            break;
-        }
-        let line_s = line?;
-        let line_ss = line_s.as_str();
-        //let line_len: usize = line_ss.len();
-        //
-        #[rustfmt::skip]
-        sioe.pout().lock().write_fmt(format_args!("{}\n", line_ss))?;
-    }
-    //
-    sioe.pout().lock().flush()?;
-    //
-    Ok(())
-}
-
-fn run_0(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
-    let mut buffer = Vec::new();
+fn run_normal(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
     let max_head = conf.opt_head.unwrap_or(0);
+    let max_tail = conf.opt_tail.unwrap_or(0);
+    let mut tail_buffer = Vec::with_capacity(max_tail);
     //
     // input
     for (curr_line_count, line) in sioe.pin().lock().lines().enumerate() {
@@ -52,19 +31,17 @@ fn run_0(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
             sioe.pout().lock().write_fmt(format_args!("{}\n", line_ss))?;
         }
         //
-        buffer.push(line_s);
-    }
-    // output
-    let tail_n = conf.opt_tail.unwrap_or(0);
-    if tail_n > 0 {
-        let buffer_len = buffer.len();
-        let len = buffer_len.min(tail_n);
-        let lines = &buffer[(buffer_len - len)..buffer_len];
-        for line in lines {
-            let line_ss = line.as_str();
-            #[rustfmt::skip]
-            sioe.pout().lock().write_fmt(format_args!("{}\n", line_ss))?;
+        tail_buffer.push(line_s);
+        if tail_buffer.len() > max_tail {
+            let _ = tail_buffer.remove(0);
         }
+    }
+    //
+    // output
+    for line_s in tail_buffer {
+        let line_ss = line_s.as_str();
+        #[rustfmt::skip]
+        sioe.pout().lock().write_fmt(format_args!("{}\n", line_ss))?;
     }
     //
     sioe.pout().lock().flush()?;
@@ -73,8 +50,9 @@ fn run_0(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
 }
 
 fn run_inverse(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
-    let mut buffer = Vec::new();
     let max_head = conf.opt_head.unwrap_or(0);
+    let max_tail = conf.opt_tail.unwrap_or(0);
+    let mut body_buffer = Vec::new();
     //
     // input
     for (curr_line_count, line) in sioe.pin().lock().lines().enumerate() {
@@ -85,20 +63,21 @@ fn run_inverse(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
         if conf.opt_head.is_some() && curr_line_count < max_head {
             // nothing todo
         } else {
-            buffer.push(line_s);
+            body_buffer.push(line_s);
         }
     }
+    //
     // output
-    let tail_n = conf.opt_tail.unwrap_or(0);
-    {
-        let buffer_len = buffer.len();
-        let len = buffer_len.min(tail_n);
-        let lines = &buffer[0..(buffer_len - len)];
-        for line in lines {
-            let line_ss = line.as_str();
-            #[rustfmt::skip]
-            sioe.pout().lock().write_fmt(format_args!("{}\n", line_ss))?;
-        }
+    // cut tail lines
+    if max_tail > 0 {
+        let buffer_len = body_buffer.len();
+        let len = buffer_len.min(max_tail);
+        let _ = body_buffer.split_off(buffer_len - len);
+    }
+    for line_s in body_buffer {
+        let line_ss = line_s.as_str();
+        #[rustfmt::skip]
+        sioe.pout().lock().write_fmt(format_args!("{}\n", line_ss))?;
     }
     //
     sioe.pout().lock().flush()?;

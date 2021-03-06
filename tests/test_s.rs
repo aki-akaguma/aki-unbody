@@ -46,14 +46,6 @@ macro_rules! version_msg {
     };
 }
 
-/*
-macro_rules! fixture_text10k {
-    () => {
-        "fixtures/text10k.txt"
-    };
-}
-*/
-
 macro_rules! do_execute {
     ($args:expr) => {
         do_execute!($args, "")
@@ -69,9 +61,10 @@ macro_rules! do_execute {
         match r {
             Ok(_) => {}
             Err(ref err) => {
-                #[rustfmt::skip]
-                                            let _ = sioe.perr().lock()
-                                                .write_fmt(format_args!("{}: {}\n", program, err));
+                let _ = sioe
+                    .perr()
+                    .lock()
+                    .write_fmt(format_args!("{}: {}\n", program, err));
             }
         };
         (r, sioe)
@@ -262,6 +255,7 @@ mod test_s2 {
         assert_eq!(r.is_ok(), true);
     }
 }
+*/
 
 mod test_s3 {
     /*
@@ -276,43 +270,3 @@ mod test_s3 {
     }
     */
 }
-
-mod test_s4 {
-    use libaki_unbody::*;
-    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
-    use runnel::RunnelIoe;
-    use std::io::Write;
-    //
-    //
-    // [BUG] thread 'main' panicked at 'begin <= end (4 <= 2) when slicing `$2 :: $0`', /checkout/src/libcore/str/mod.rs:2221:4
-    // echo "001cea1eef55.softphone.blizoo.bg" | rust-gsub -e "(.*\\.){0,1}([A-Za-z0-9][A-Za-z0-9\\-]{1,61}(\\.[A-Za-z0-9]{2,}){0,1}(\\.[A-Za-z]{2,}){0,1}\\.[A-Za-z]{2,5})$" -f "\$2 :: \$0"
-    //
-    #[test]
-    fn test_fix_bug_1() {
-        let (r, sioe) = do_execute!(&[
-                "-e",
-                "(.*\\.){0,1}([A-Za-z0-9][A-Za-z0-9\\-]{1,61}(\\.[A-Za-z0-9]{2,}){0,1}(\\.[A-Za-z]{2,}){0,1}\\.[A-Za-z]{2,5})$",
-                "-f",
-                "$2 :: $0",
-            ],
-            "001cea1eef55.softphone.blizoo.bg\n");
-        assert_eq!(buff!(sioe, serr), "");
-        assert_eq!(
-            buff!(sioe, sout),
-            "blizoo.bg :: 001cea1eef55.softphone.blizoo.bg\n"
-        );
-        assert_eq!(r.is_ok(), true);
-    }
-    //
-    #[test]
-    fn test_fix_bug_2() {
-        let (r, sioe) = do_execute!(
-            &["-e", "ICON=\"[^\"]*\"", "-f", ""],
-            "abc ICON=\"ABCDEFG\" defg\n"
-        );
-        assert_eq!(buff!(sioe, serr), "");
-        assert_eq!(buff!(sioe, sout), "abc  defg\n");
-        assert_eq!(r.is_ok(), true);
-    }
-}
-*/

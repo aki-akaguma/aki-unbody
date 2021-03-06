@@ -236,6 +236,7 @@ mod test_2 {
         assert_eq!(oup.status.success(), true);
     }
 } // mod test_2
+*/
 
 mod test_3 {
     use crate::helper::exec_target;
@@ -244,54 +245,18 @@ mod test_3 {
     #[test]
     fn test_output_broken_pipe() {
         let cmdstr = format!(
-            "cat \"{}\" | \"{}\" -e \"A\" -f a | head -n 2",
-            fixture_text10k!(),
-            TARGET_EXE_PATH
+            "cat \"{}\" | \"{}\" -h 10 | head -n 2",
+            "fixtures/sherlock.txt", TARGET_EXE_PATH
         );
         let oup = exec_target("sh", &["-c", &cmdstr]);
         assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "aBCDEFG\nHIJKLMN\n");
-        assert_eq!(oup.status.success(), true);
-    }
-}
-
-mod test_4 {
-    use crate::helper::exec_target_with_in;
-    //use exec_target::args_from;
-    const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
-
-    //
-    // [BUG] thread 'main' panicked at 'begin <= end (4 <= 2) when slicing `$2 :: $0`', /checkout/src/libcore/str/mod.rs:2221:4
-    // echo "001cea1eef55.softphone.blizoo.bg" | rust-gsub -e "(.*\\.){0,1}([A-Za-z0-9][A-Za-z0-9\\-]{1,61}(\\.[A-Za-z0-9]{2,}){0,1}(\\.[A-Za-z]{2,}){0,1}\\.[A-Za-z]{2,5})$" -f "\$2 :: \$0"
-    //
-    #[test]
-    fn test_fix_bug_1() {
-        let oup = exec_target_with_in(TARGET_EXE_PATH,
-            &[
-                "-e",
-                "(.*\\.){0,1}([A-Za-z0-9][A-Za-z0-9\\-]{1,61}(\\.[A-Za-z0-9]{2,}){0,1}(\\.[A-Za-z]{2,}){0,1}\\.[A-Za-z]{2,5})$",
-                "-f",
-                "$2 :: $0",
-            ],
-            b"001cea1eef55.softphone.blizoo.bg\n" as &[u8]);
-        assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
-            "blizoo.bg :: 001cea1eef55.softphone.blizoo.bg\n"
+            concat!(
+                "You could not possibly have come at a better time, my dear Watson,\n",
+                "he said cordially.\n"
+            )
         );
-        assert_eq!(oup.status.success(), true);
-    }
-    //
-    #[test]
-    fn test_fix_bug_2() {
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            &["-e", "ICON=\"[^\"]*\"", "-f", ""],
-            b"abc ICON=\"ABCDEFG\" defg\n" as &[u8],
-        );
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "abc  defg\n");
         assert_eq!(oup.status.success(), true);
     }
 }
-*/
