@@ -1,6 +1,6 @@
 [package]
 name = "aki-unbody"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["aki <aki.akaguma@hotmail.com>"]
 description = """
 output first or last n lines, like a head and tail of linux command.
@@ -26,7 +26,6 @@ path = "src/main.rs"
 default = []
 
 [dependencies]
-regex = "1.4"
 anyhow = "1.0"
 flood-tide = { version="0.1", default-features=true, features=["stop_at_mm"] }
 runnel = "0.3"
