@@ -138,3 +138,7 @@ LN:0004,text
 See [`fn execute()`] for this library examples.
 
 [`fn execute()`]: crate::execute
+
+## Changelogs
+
+[This crate's changelog here.](https://github.com/aki-akaguma/aki-unbody/blob/main/CHANGELOG.md)
