@@ -6,6 +6,7 @@ const OPTIONS_TEXT: &str = r"Options:
 
   -H, --help        display this help and exit
   -V, --version     display version information and exit
+  -X <x-options>    x options. try -X help
 ";
 
 #[repr(u8)]
@@ -16,6 +17,7 @@ enum CmdOp {
     Inverse,
     Help,
     Version,
+    UcX,
 }
 
 impl std::convert::From<u8> for CmdOp {
@@ -30,7 +32,8 @@ impl CmdOp {
 }
 
 #[rustfmt::skip]
-const OPT_ARY: [Opt;5] = [
+const OPT_ARY: [Opt;6] = [
+    Opt { sho: b'X', lon: "",              has: Arg::Yes, num: CmdOp::UcX.to(), },
     Opt { sho: b'h', lon: "head",          has: Arg::Yes, num: CmdOp::Head.to(), },
     Opt { sho: b'H', lon: "help",          has: Arg::No,  num: CmdOp::Help.to(), },
     Opt { sho: b'i', lon: "inverse",       has: Arg::No,  num: CmdOp::Inverse.to(), },
@@ -39,8 +42,8 @@ const OPT_ARY: [Opt;5] = [
 ];
 
 #[rustfmt::skip]
-const OPT_ARY_SHO_IDX: [(u8,usize);5] = [
-(b'H',1),(b'V',4),(b'h',0),(b'i',2),(b't',3),];
+const OPT_ARY_SHO_IDX: [(u8,usize);6] = [
+(b'H',2),(b'V',5),(b'X',0),(b'h',1),(b'i',3),(b't',4),];
 
 #[derive(Debug, Default, PartialEq)]
 pub struct CmdOptConf {
@@ -51,6 +54,7 @@ pub struct CmdOptConf {
     pub flg_inverse: bool,
     pub flg_help: bool,
     pub flg_version: bool,
+    pub opt_uc_x: Vec<OptUcXParam>,
     //
     pub arg_params: Vec<String>,
 }
@@ -69,10 +73,23 @@ fn value_to_usize(nv: &NameVal<'_>) -> Result<usize, OptParseError> {
         Some(x) => match x.parse::<usize>() {
             Ok(d) => Ok(d),
             Err(err) => Err(OptParseError::invalid_option_argument(
-                &nv.opt.lon,
+                &nv.opt.lon_or_sho(),
                 &err.to_string(),
             )),
         },
-        None => Err(OptParseError::missing_option_argument(&nv.opt.lon)),
+        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
+    }
+}
+
+fn value_to_opt_uc_x_param(nv: &NameVal<'_>) -> Result<OptUcXParam, OptParseError> {
+    match nv.val {
+        Some(s) => match FromStr::from_str(s) {
+            Ok(x) => Ok(x),
+            Err(err) => Err(OptParseError::invalid_option_argument(
+                &nv.opt.lon_or_sho(),
+                &err.to_string(),
+            )),
+        },
+        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
     }
 }

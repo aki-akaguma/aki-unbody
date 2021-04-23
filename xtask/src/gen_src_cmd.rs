@@ -10,6 +10,8 @@ pub fn do_gen_src() -> anyhow::Result<()> {
             let tup = match opt_str.lon_or_sho() {
                 "head" => (true, false, MetaType::Usize),
                 "tail" => (true, false, MetaType::Usize),
+                //
+                "X" => (false, true, MetaType::Other("opt_uc_x_param".into())),
                 _ => return None,
             };
             Some(FixupType::from_tuple(tup))
