@@ -1,4 +1,4 @@
-const TARGET_EXE_PATH: &'static str = "target/debug/aki-unbody";
+const TARGET_EXE_PATH: &'static str = env!("CARGO_BIN_EXE_aki-unbody");
 
 macro_rules! help_msg {
     () => {

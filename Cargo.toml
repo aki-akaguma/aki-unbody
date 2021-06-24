@@ -1,6 +1,6 @@
 [package]
 name = "aki-unbody"
-version = "0.1.10"
+version = "0.1.11"
 authors = ["aki <aki.akaguma@hotmail.com>"]
 description = """
 output first or last n lines, like a head and tail of linux command.
@@ -30,12 +30,13 @@ debian_build = []
 anyhow = "1.0"
 flood-tide = { version="0.2", default-features=true, features=["stop_at_mm"] }
 runnel = "0.3"
+memx-cdy = "0.1"
 
 [dev-dependencies]
 
 [build-dependencies]
 rust-version-info-file = "0.1"
-rustc_version = "0.3"
+rustc_version = "0.4"
 
 [workspace]
 members = [
