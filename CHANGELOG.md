@@ -2,6 +2,13 @@ aki-unbody TBD
 ===
 Unreleased changes. Release notes have not yet been written.
 
+0.1.11 (2021-06-24)
+=====
+
+* add `memx_cdy::memx_init(); // fast mem operation.`
+* rewite TARGET_EXE_PATH with `env!("CARGO_BIN_EXE_aki-unbody")`
+* bug fix: `#[cfg(feature = "debian_build")]`
+
 0.1.10 (2021-06-03)
 =====
 
