@@ -1,31 +1,35 @@
-const TARGET_EXE_PATH: &'static str = env!("CARGO_BIN_EXE_aki-unbody");
+const TARGET_EXE_PATH: &'static str = env!(concat!("CARGO_BIN_EXE_", env!("CARGO_PKG_NAME")));
 
 macro_rules! help_msg {
     () => {
         concat!(
             version_msg!(),
             "\n",
-            "Usage:\n",
-            "  aki-unbody [options]\n",
-            "\n",
-            "output first or last n lines, like a head and tail of linux command.\n",
-            "\n",
-            "Options:\n",
-            "  -h, --head <num>      output the first <num> lines.\n",
-            "  -t, --tail <num>      output the last <num> lines.\n",
-            "  -i, --inverse         output the body, except for head and tail.\n",
-            "\n",
-            "  -H, --help        display this help and exit\n",
-            "  -V, --version     display version information and exit\n",
-            "  -X <x-options>    x options. try -X help\n",
-            "\n",
-            "Examples:\n",
-            "  Outputs first 2 lines:\n",
-            "    cat file1.txt | aki-unbody --head 2\n",
-            "  Outputs last 2 lines:\n",
-            "    cat file1.txt | aki-unbody --tail 2\n",
-            "  Outputs body, except for first 2 lines and last 2 lines:\n",
-            "    cat file1.txt | aki-unbody --head 2 --tail 2 --inverse\n",
+            indoc::indoc!(
+                r#"
+            Usage:
+              aki-unbody [options]
+
+            output first or last n lines, like a head and tail of linux command.
+
+            Options:
+              -h, --head <num>      output the first <num> lines.
+              -t, --tail <num>      output the last <num> lines.
+              -i, --inverse         output the body, except for head and tail.
+
+              -H, --help        display this help and exit
+              -V, --version     display version information and exit
+              -X <x-options>    x options. try -X help
+
+            Examples:
+              Outputs first 2 lines:
+                cat file1.txt | aki-unbody --head 2
+              Outputs last 2 lines:
+                cat file1.txt | aki-unbody --tail 2
+              Outputs body, except for first 2 lines and last 2 lines:
+                cat file1.txt | aki-unbody --head 2 --tail 2 --inverse
+            "#
+            ),
             "\n",
         )
     };
@@ -49,10 +53,10 @@ macro_rules! version_msg {
     };
 }
 
-mod helper;
+//mod helper;
 
 mod test_0 {
-    use crate::helper::exec_target;
+    use exec_target::exec_target;
     const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
     //
     #[test]
@@ -131,7 +135,7 @@ A proposition which I took the liberty of doubting.
 ";
 
 mod test_1 {
-    use crate::helper::exec_target_with_in;
+    use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
     //
     #[test]
@@ -209,7 +213,7 @@ mod test_1 {
 
 /*
 mod test_2 {
-    use crate::helper::exec_target_with_in;
+    use exec_target::exec_target_with_in;
     //use exec_target::args_from;
     const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
     //
@@ -240,7 +244,7 @@ mod test_2 {
 */
 
 mod test_3 {
-    use crate::helper::exec_target;
+    use exec_target::exec_target;
     const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
     //
     #[test]
