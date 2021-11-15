@@ -40,7 +40,7 @@ Examples:
 1. you can install this into cargo bin path:
 
 ```text
-cargo install aki-stats
+cargo install aki-unbody
 ```
 
 2. you can build debian package:
