@@ -36,6 +36,22 @@ Examples:
     cat file1.txt | aki-unbody --head 2 --tail 2 --inverse
 ```
 
+## Quick install
+
+1. you can install this into cargo bin path:
+
+```
+cargo install aki-stats
+```
+
+2. you can build debian package:
+
+```
+cargo deb
+```
+
+and install **.deb** into your local repository of debian package.
+
 ## Examples
 
 The input data used in this example looks like this:
