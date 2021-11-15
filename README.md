@@ -1,18 +1,19 @@
 # aki-unbody
 
-*aki-unbody* is output first or last n lines, like a head and tail of linux command.
+output first or last n lines, like a head and tail of linux command.
 
 ## Features
 
-*aki-unbody*  is output first or last n lines, like a head and tail of linux command.
+- output first or last n lines, like a head and tail of linux command.
+- minimum support rustc 1.47.0 (18bf6b4f0 2020-10-07)
 
-* command help
+## Command help
 
-```text
+```
 aki-unbody --help
 ```
 
-```text
+```
 Usage:
   aki-unbody [options]
 
@@ -34,24 +35,6 @@ Examples:
   Outputs body, except for first 2 lines and last 2 lines:
     cat file1.txt | aki-unbody --head 2 --tail 2 --inverse
 ```
-
-* minimum support rustc 1.38.0
-
-## Quick install
-
-1. you can install this into cargo bin path:
-
-```text
-cargo install aki-unbody
-```
-
-2. you can build debian package:
-
-```text
-cargo deb
-```
-
-and install **.deb** into your local repository of debian package.
 
 ## Examples
 
@@ -139,6 +122,17 @@ See [`fn execute()`] for this library examples.
 
 [`fn execute()`]: crate::execute
 
-## Changelogs
+# Changelogs
 
 [This crate's changelog here.](https://github.com/aki-akaguma/aki-unbody/blob/main/CHANGELOG.md)
+
+# License
+
+This project is licensed under either of
+
+ * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or
+   https://www.apache.org/licenses/LICENSE-2.0)
+ * MIT license ([LICENSE-MIT](LICENSE-MIT) or
+   https://opensource.org/licenses/MIT)
+
+at your option.
