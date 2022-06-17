@@ -5,7 +5,7 @@ output first or last n lines, like a head and tail of linux command.
 ## Features
 
 - output first or last n lines, like a head and tail of linux command.
-- minimum support rustc 1.47.0 (18bf6b4f0 2020-10-07)
+- minimum support rustc 1.56.1 (59eed8a2a 2021-11-01)
 
 ## Command help
 

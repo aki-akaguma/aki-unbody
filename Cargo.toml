@@ -1,6 +1,6 @@
 [package]
 name = "aki-unbody"
-version = "0.1.16"
+version = "0.1.17"
 authors = ["aki <aki.akaguma@hotmail.com>"]
 description = """
 output first or last n lines, like a head and tail of linux command.
@@ -10,7 +10,7 @@ categories = ["command-line-utilities", "text-processing"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 build = "build.rs"
-edition = "2018"
+edition = "2021"
 repository = "https://github.com/aki-akaguma/aki-unbody"
 
 [lib]
