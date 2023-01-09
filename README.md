@@ -1,5 +1,10 @@
 # aki-unbody
 
+[![crate][crate-image]][crate-link]
+[![Docs][docs-image]][docs-link]
+![Rust Version][rustc-image]
+![Apache2/MIT licensed][license-image]
+
 output first or last n lines, like a head and tail of linux command.
 
 ## Features
@@ -152,3 +157,12 @@ This project is licensed under either of
    https://opensource.org/licenses/MIT)
 
 at your option.
+
+[//]: # (badges)
+
+[crate-image]: https://img.shields.io/crates/v/aki-unbody.svg
+[crate-link]: https://crates.io/crates/aki-unbody
+[docs-image]: https://docs.rs/aki-unbody/badge.svg
+[docs-link]: https://docs.rs/aki-unbody/
+[rustc-image]: https://img.shields.io/badge/rustc-1.56+-blue.svg
+[license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
