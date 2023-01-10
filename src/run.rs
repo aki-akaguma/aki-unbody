@@ -28,7 +28,7 @@ fn run_normal(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
         //
         if conf.opt_head.is_some() && curr_line_count < max_head {
             #[rustfmt::skip]
-            sioe.pout().lock().write_fmt(format_args!("{}\n", line_ss))?;
+            sioe.pout().lock().write_fmt(format_args!("{line_ss}\n"))?;
         }
         //
         tail_buffer.push(line_s);
@@ -41,7 +41,7 @@ fn run_normal(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
     for line_s in tail_buffer {
         let line_ss = line_s.as_str();
         #[rustfmt::skip]
-        sioe.pout().lock().write_fmt(format_args!("{}\n", line_ss))?;
+        sioe.pout().lock().write_fmt(format_args!("{line_ss}\n"))?;
     }
     //
     sioe.pout().lock().flush()?;
@@ -77,7 +77,7 @@ fn run_inverse(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
     for line_s in body_buffer {
         let line_ss = line_s.as_str();
         #[rustfmt::skip]
-        sioe.pout().lock().write_fmt(format_args!("{}\n", line_ss))?;
+        sioe.pout().lock().write_fmt(format_args!("{line_ss}\n"))?;
     }
     //
     sioe.pout().lock().flush()?;
