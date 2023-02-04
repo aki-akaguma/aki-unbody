@@ -1,4 +1,4 @@
-const TARGET_EXE_PATH: &'static str = env!(concat!("CARGO_BIN_EXE_", env!("CARGO_PKG_NAME")));
+const TARGET_EXE_PATH: &str = env!(concat!("CARGO_BIN_EXE_", env!("CARGO_PKG_NAME")));
 
 macro_rules! help_msg {
     () => {
@@ -57,39 +57,39 @@ macro_rules! version_msg {
 
 mod test_0 {
     use exec_target::exec_target;
-    const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
+    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_help() {
-        let oup = exec_target(TARGET_EXE_PATH, &["-H"]);
+        let oup = exec_target(TARGET_EXE_PATH, ["-H"]);
         assert_eq!(oup.stderr, "");
         assert_eq!(oup.stdout, help_msg!());
-        assert_eq!(oup.status.success(), true);
+        assert!(oup.status.success());
     }
     #[test]
     fn test_help_long() {
-        let oup = exec_target(TARGET_EXE_PATH, &["--help"]);
+        let oup = exec_target(TARGET_EXE_PATH, ["--help"]);
         assert_eq!(oup.stderr, "");
         assert_eq!(oup.stdout, help_msg!());
-        assert_eq!(oup.status.success(), true);
+        assert!(oup.status.success());
     }
     #[test]
     fn test_version() {
-        let oup = exec_target(TARGET_EXE_PATH, &["-V"]);
+        let oup = exec_target(TARGET_EXE_PATH, ["-V"]);
         assert_eq!(oup.stderr, "");
         assert_eq!(oup.stdout, version_msg!());
-        assert_eq!(oup.status.success(), true);
+        assert!(oup.status.success());
     }
     #[test]
     fn test_version_long() {
-        let oup = exec_target(TARGET_EXE_PATH, &["--version"]);
+        let oup = exec_target(TARGET_EXE_PATH, ["--version"]);
         assert_eq!(oup.stderr, "");
         assert_eq!(oup.stdout, version_msg!());
-        assert_eq!(oup.status.success(), true);
+        assert!(oup.status.success());
     }
     #[test]
     fn test_non_option() {
-        let oup = exec_target(TARGET_EXE_PATH, &[""]);
+        let oup = exec_target(TARGET_EXE_PATH, [""]);
         assert_eq!(
             oup.stderr,
             concat!(
@@ -101,7 +101,7 @@ mod test_0 {
             )
         );
         assert_eq!(oup.stdout, "");
-        assert_eq!(oup.status.success(), false);
+        assert!(!oup.status.success());
     }
 } // mod test_0
 
@@ -136,11 +136,11 @@ A proposition which I took the liberty of doubting.
 
 mod test_1 {
     use exec_target::exec_target_with_in;
-    const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
+    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_t1() {
-        let oup = exec_target_with_in(TARGET_EXE_PATH, &["-h", "3"], super::IN_DAT_1.as_bytes());
+        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-h", "3"], super::IN_DAT_1.as_bytes());
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
@@ -150,12 +150,12 @@ mod test_1 {
                 "I was afraid that you were engaged.\n",
             )
         );
-        assert_eq!(oup.status.success(), true);
+        assert!(oup.status.success());
     }
     //
     #[test]
     fn test_t2() {
-        let oup = exec_target_with_in(TARGET_EXE_PATH, &["-t", "3"], super::IN_DAT_1.as_bytes());
+        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-t", "3"], super::IN_DAT_1.as_bytes());
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
@@ -165,14 +165,14 @@ mod test_1 {
                 "A proposition which I took the liberty of doubting.\n",
             )
         );
-        assert_eq!(oup.status.success(), true);
+        assert!(oup.status.success());
     }
     //
     #[test]
     fn test_t3() {
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
-            &["-h", "3", "-t", "3"],
+            ["-h", "3", "-t", "3"],
             super::IN_DAT_1.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
@@ -188,14 +188,14 @@ mod test_1 {
                 "A proposition which I took the liberty of doubting.\n",
             )
         );
-        assert_eq!(oup.status.success(), true);
+        assert!(oup.status.success());
     }
     //
     #[test]
     fn test_t4() {
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
-            &["-h", "9", "-t", "14", "-i"],
+            ["-h", "9", "-t", "14", "-i"],
             super::IN_DAT_1.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
@@ -207,7 +207,7 @@ mod test_1 {
                 "as was his custom when in judicial moods.\n",
             )
         );
-        assert_eq!(oup.status.success(), true);
+        assert!(oup.status.success());
     }
 }
 
@@ -226,7 +226,7 @@ mod test_2 {
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(oup.stdout, "1bc1bc1\noooooo\n1bc1bc1\n");
-        assert_eq!(oup.status.success(), true);
+        assert!(oup.status.success());
     }
     //
     #[test]
@@ -238,14 +238,14 @@ mod test_2 {
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(oup.stdout, "1bc1bc1\n1bc1bc1\n");
-        assert_eq!(oup.status.success(), true);
+        assert!(oup.status.success());
     }
 } // mod test_2
 */
 
 mod test_3 {
     use exec_target::exec_target;
-    const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
+    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_output_broken_pipe() {
@@ -253,7 +253,7 @@ mod test_3 {
             "cat \"{}\" | \"{}\" -h 10 | head -n 2",
             "fixtures/sherlock.txt", TARGET_EXE_PATH
         );
-        let oup = exec_target("sh", &["-c", &cmdstr]);
+        let oup = exec_target("sh", ["-c", &cmdstr]);
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
@@ -262,6 +262,6 @@ mod test_3 {
                 "he said cordially.\n"
             )
         );
-        assert_eq!(oup.status.success(), true);
+        assert!(oup.status.success());
     }
 }
