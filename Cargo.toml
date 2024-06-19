@@ -1,6 +1,6 @@
 [package]
 name = "aki-unbody"
-version = "0.1.18"
+version = "0.1.19"
 authors = ["aki <aki.akaguma@hotmail.com>"]
 description = """
 output first or last n lines, like a head and tail of linux command.
