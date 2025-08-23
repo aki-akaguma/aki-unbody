@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * minimum support version in doc
 * rust-version: "1.65.0"
+* clippy::derivable_impls
 
 ## [0.1.19] (2024-06-19)
 ### Added
