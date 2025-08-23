@@ -1,7 +1,6 @@
 use crate::conf::CmdOptConf;
 use crate::util::err::BrokenPipeError;
 use runnel::RunnelIoe;
-use std::io::{BufRead, Write};
 
 pub fn run(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
     let r = if conf.flg_inverse {
@@ -21,16 +20,12 @@ fn run_normal(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
     let mut tail_buffer = Vec::with_capacity(max_tail);
     //
     // input
-    for (curr_line_count, line) in sioe.pin().lock().lines().enumerate() {
+    for (curr_line_count, line) in sioe.pg_in().lines().enumerate() {
         let line_s = line?;
-        let line_ss = line_s.as_str();
-        //let line_len: usize = line_ss.len();
         //
         if conf.opt_head.is_some() && curr_line_count < max_head {
-            #[rustfmt::skip]
-            sioe.pout().lock().write_fmt(format_args!("{line_ss}\n"))?;
+            sioe.pg_out().write_line(line_s.clone())?;
         }
-        //
         tail_buffer.push(line_s);
         if tail_buffer.len() > max_tail {
             let _ = tail_buffer.remove(0);
@@ -39,12 +34,10 @@ fn run_normal(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
     //
     // output
     for line_s in tail_buffer {
-        let line_ss = line_s.as_str();
-        #[rustfmt::skip]
-        sioe.pout().lock().write_fmt(format_args!("{line_ss}\n"))?;
+        sioe.pg_out().write_line(line_s)?;
     }
     //
-    sioe.pout().lock().flush()?;
+    sioe.pg_out().flush_line()?;
     //
     Ok(())
 }
@@ -55,10 +48,8 @@ fn run_inverse(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
     let mut body_buffer = Vec::new();
     //
     // input
-    for (curr_line_count, line) in sioe.pin().lock().lines().enumerate() {
+    for (curr_line_count, line) in sioe.pg_in().lines().enumerate() {
         let line_s = line?;
-        //let line_ss = line_s.as_str();
-        //let line_len: usize = line_ss.len();
         //
         if conf.opt_head.is_some() && curr_line_count < max_head {
             // nothing todo
@@ -75,12 +66,10 @@ fn run_inverse(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
         let _ = body_buffer.split_off(buffer_len - len);
     }
     for line_s in body_buffer {
-        let line_ss = line_s.as_str();
-        #[rustfmt::skip]
-        sioe.pout().lock().write_fmt(format_args!("{line_ss}\n"))?;
+        sioe.pg_out().write_line(line_s)?;
     }
     //
-    sioe.pout().lock().flush()?;
+    sioe.pg_out().flush_line()?;
     //
     Ok(())
 }
