@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 * updated: runnel(0.4.0)
 * updated: rust-version-info-file(0.2)
+* `actions/checkout@v4` in github
 
 ### Fixed
 * minimum support version in doc
