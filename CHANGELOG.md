@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * updated: runnel(0.4.0)
 * updated: rust-version-info-file(0.2)
 
+### Fixed
+* minimum support version in doc
+* rust-version: "1.65.0"
+
 ## [0.1.19] (2024-06-19)
 ### Added
 * `.github/workflows/test-ubuntu.yml`

@@ -13,7 +13,7 @@ output first or last n lines, like a head and tail of linux command.
 ## Features
 
 - output first or last n lines, like a head and tail of linux command.
-- minimum support rustc 1.58.1 (db9d1b20b 2022-01-20)
+- minimum support rustc 1.65.0 (897e37553 2022-11-02)
 
 ## Command help
 
@@ -167,7 +167,7 @@ at your option.
 [crate-link]: https://crates.io/crates/aki-unbody
 [docs-image]: https://docs.rs/aki-unbody/badge.svg
 [docs-link]: https://docs.rs/aki-unbody/
-[rustc-image]: https://img.shields.io/badge/rustc-1.58+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.65+-blue.svg
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [test-ubuntu-image]: https://github.com/aki-akaguma/aki-unbody/actions/workflows/test-ubuntu.yml/badge.svg
 [test-ubuntu-link]: https://github.com/aki-akaguma/aki-unbody/actions/workflows/test-ubuntu.yml
