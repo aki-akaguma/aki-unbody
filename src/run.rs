@@ -17,7 +17,7 @@ pub fn run(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
 fn run_normal(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
     let max_head = conf.opt_head.unwrap_or(0);
     let max_tail = conf.opt_tail.unwrap_or(0);
-    let mut tail_buffer = Vec::with_capacity(max_tail);
+    let mut tail_buffer = Vec::with_capacity(max_tail.min(4 * 1024));
     //
     // input
     for (curr_line_count, line) in sioe.pg_in().lines().enumerate() {
