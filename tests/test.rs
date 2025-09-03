@@ -1,59 +1,7 @@
 const TARGET_EXE_PATH: &str = env!(concat!("CARGO_BIN_EXE_", env!("CARGO_PKG_NAME")));
 
-macro_rules! help_msg {
-    () => {
-        concat!(
-            version_msg!(),
-            "\n",
-            indoc::indoc!(
-                r#"
-            Usage:
-              aki-unbody [options]
-
-            output first or last n lines, like a head and tail of linux command.
-
-            Options:
-              -h, --head <num>      output the first <num> lines.
-              -t, --tail <num>      output the last <num> lines.
-              -i, --inverse         output the body, except for head and tail.
-
-              -H, --help        display this help and exit
-              -V, --version     display version information and exit
-              -X <x-options>    x options. try -X help
-
-            Examples:
-              Outputs first 2 lines:
-                cat file1.txt | aki-unbody --head 2
-              Outputs last 2 lines:
-                cat file1.txt | aki-unbody --tail 2
-              Outputs body, except for first 2 lines and last 2 lines:
-                cat file1.txt | aki-unbody --head 2 --tail 2 --inverse
-            "#
-            ),
-            "\n",
-        )
-    };
-}
-
-macro_rules! try_help_msg {
-    () => {
-        "Try --help for help.\n"
-    };
-}
-
-macro_rules! program_name {
-    () => {
-        "aki-unbody"
-    };
-}
-
-macro_rules! version_msg {
-    () => {
-        concat!(program_name!(), " ", env!("CARGO_PKG_VERSION"), "\n")
-    };
-}
-
-//mod helper;
+#[macro_use]
+mod helper;
 
 mod test_0 {
     use exec_target::exec_target;
@@ -88,6 +36,61 @@ mod test_0 {
         assert!(oup.status.success());
     }
     #[test]
+    fn test_invalid_opt() {
+        let oup = exec_target(TARGET_EXE_PATH, ["-z"]);
+        assert_eq!(
+            oup.stderr,
+            concat!(
+                program_name!(),
+                ": ",
+                "Invalid option: z\n",
+                "Missing option: h or t\n",
+                try_help_msg!()
+            )
+        );
+        assert_eq!(oup.stdout, "");
+        assert!(!oup.status.success());
+    }
+}
+
+mod test_0_x_options {
+    use exec_target::exec_target;
+    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+    //
+    #[test]
+    fn test_x_option_help() {
+        let oup = exec_target(TARGET_EXE_PATH, ["-X", "help"]);
+        assert_eq!(oup.stderr, "");
+        assert!(oup.stdout.contains("Options:"));
+        assert!(oup.stdout.contains("-X rust-version-info"));
+        assert!(oup.status.success());
+    }
+    //
+    #[test]
+    fn test_x_option_rust_version_info() {
+        let oup = exec_target(TARGET_EXE_PATH, ["-X", "rust-version-info"]);
+        assert_eq!(oup.stderr, "");
+        assert!(oup.stdout.contains("rustc"));
+        assert!(oup.status.success());
+    }
+    //
+    #[test]
+    fn test_multiple_x_options() {
+        let oup = exec_target(TARGET_EXE_PATH, ["-X", "help", "-X", "rust-version-info"]);
+        assert_eq!(oup.stderr, "");
+        // The first one should be executed and the program should exit.
+        assert!(oup.stdout.contains("Options:"));
+        assert!(!oup.stdout.contains("rustc"));
+        assert!(oup.status.success());
+    }
+}
+
+mod test_1 {
+    use exec_target::exec_target;
+    use exec_target::exec_target_with_in;
+    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+    //
+    #[test]
     fn test_non_option() {
         let oup = exec_target(TARGET_EXE_PATH, [""]);
         assert_eq!(
@@ -103,7 +106,25 @@ mod test_0 {
         assert_eq!(oup.stdout, "");
         assert!(!oup.status.success());
     }
-} // mod test_0
+    //
+    #[test]
+    fn test_invalid_utf8() {
+        let v = {
+            use std::io::Read;
+            let mut f = std::fs::File::open(fixture_invalid_utf8!()).unwrap();
+            let mut v = Vec::new();
+            f.read_to_end(&mut v).unwrap();
+            v
+        };
+        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-h", "10"], &v);
+        assert_eq!(
+            oup.stderr,
+            concat!(program_name!(), ": stream did not contain valid UTF-8\n",)
+        );
+        assert_eq!(oup.stdout, "");
+        assert!(!oup.status.success());
+    }
+}
 
 const IN_DAT_1: &str = "\
 You could not possibly have come at a better time, my dear Watson,
@@ -134,7 +155,7 @@ which is always far more daring than any effort of the imagination.
 A proposition which I took the liberty of doubting.
 ";
 
-mod test_1 {
+mod test_1_more {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //

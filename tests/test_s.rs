@@ -1,56 +1,3 @@
-macro_rules! help_msg {
-    () => {
-        concat!(
-            version_msg!(),
-            "\n",
-            indoc::indoc!(
-                r#"
-            Usage:
-              aki-unbody [options]
-
-            output first or last n lines, like a head and tail of linux command.
-
-            Options:
-              -h, --head <num>      output the first <num> lines.
-              -t, --tail <num>      output the last <num> lines.
-              -i, --inverse         output the body, except for head and tail.
-
-              -H, --help        display this help and exit
-              -V, --version     display version information and exit
-              -X <x-options>    x options. try -X help
-
-            Examples:
-              Outputs first 2 lines:
-                cat file1.txt | aki-unbody --head 2
-              Outputs last 2 lines:
-                cat file1.txt | aki-unbody --tail 2
-              Outputs body, except for first 2 lines and last 2 lines:
-                cat file1.txt | aki-unbody --head 2 --tail 2 --inverse
-            "#
-            ),
-            "\n",
-        )
-    };
-}
-
-macro_rules! try_help_msg {
-    () => {
-        "Try --help for help.\n"
-    };
-}
-
-macro_rules! program_name {
-    () => {
-        "aki-unbody"
-    };
-}
-
-macro_rules! version_msg {
-    () => {
-        concat!(program_name!(), " ", env!("CARGO_PKG_VERSION"), "\n")
-    };
-}
-
 macro_rules! do_execute {
     ($args:expr) => {
         do_execute!($args, "")
@@ -87,6 +34,9 @@ macro_rules! buff {
     };
 }
 
+#[macro_use]
+mod helper;
+
 mod test_s0 {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
@@ -95,35 +45,51 @@ mod test_s0 {
     //
     #[test]
     fn test_help() {
-        let (r, sioe) = do_execute!(&["-H"]);
+        let (r, sioe) = do_execute!(["-H"]);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(buff!(sioe, sout), help_msg!());
         assert!(r.is_ok());
     }
     #[test]
     fn test_help_long() {
-        let (r, sioe) = do_execute!(&["--help"]);
+        let (r, sioe) = do_execute!(["--help"]);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(buff!(sioe, sout), help_msg!());
         assert!(r.is_ok());
     }
     #[test]
     fn test_version() {
-        let (r, sioe) = do_execute!(&["-V"]);
+        let (r, sioe) = do_execute!(["-V"]);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(buff!(sioe, sout), version_msg!());
         assert!(r.is_ok());
     }
     #[test]
     fn test_version_long() {
-        let (r, sioe) = do_execute!(&["--version"]);
+        let (r, sioe) = do_execute!(["--version"]);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(buff!(sioe, sout), version_msg!());
         assert!(r.is_ok());
     }
     #[test]
+    fn test_invalid_opt() {
+        let (r, sioe) = do_execute!(["-z"]);
+        assert_eq!(
+            buff!(sioe, serr),
+            concat!(
+                program_name!(),
+                ": ",
+                "Invalid option: z\n",
+                "Missing option: h or t\n",
+                try_help_msg!()
+            )
+        );
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    #[test]
     fn test_non_option() {
-        let (r, sioe) = do_execute!(&[""]);
+        let (r, sioe) = do_execute!([""]);
         #[rustfmt::skip]
         assert_eq!(
             buff!(sioe, serr),
@@ -137,6 +103,90 @@ mod test_s0 {
         assert_eq!(buff!(sioe, sout), "");
         assert!(r.is_err());
     }
+}
+
+mod test_0_x_options_s {
+    use libaki_unbody::*;
+    use runnel::medium::stringio::*;
+    use runnel::*;
+    //
+    #[test]
+    fn test_x_rust_version_info() {
+        let (r, sioe) = do_execute!(["-X", "rust-version-info"]);
+        assert_eq!(buff!(sioe, serr), "");
+        assert!(!buff!(sioe, sout).is_empty());
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_x_option_help() {
+        let (r, sioe) = do_execute!(["-X", "help"]);
+        assert_eq!(buff!(sioe, serr), "");
+        assert!(buff!(sioe, sout).contains("Options:"));
+        assert!(buff!(sioe, sout).contains("-X rust-version-info"));
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_x_option_rust_version_info() {
+        let (r, sioe) = do_execute!(["-X", "rust-version-info"]);
+        assert_eq!(buff!(sioe, serr), "");
+        assert!(buff!(sioe, sout).contains("rustc"));
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_multiple_x_options() {
+        let (r, sioe) = do_execute!(["-X", "help", "-X", "rust-version-info"]);
+        assert_eq!(buff!(sioe, serr), "");
+        // The first one should be executed and the program should exit.
+        assert!(buff!(sioe, sout).contains("Options:"));
+        assert!(!buff!(sioe, sout).contains("rustc"));
+        assert!(r.is_ok());
+    }
+}
+
+mod test_1_s {
+    use libaki_unbody::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_non_option() {
+        let (r, sioe) = do_execute!([""]);
+        #[rustfmt::skip]
+        assert_eq!(
+            buff!(sioe, serr),
+            concat!(
+                program_name!(), ": ",
+                "Missing option: h or t\n",
+                "Unexpected argument: \n",
+                try_help_msg!()
+            )
+        );
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    /*
+    #[test]
+    fn test_invalid_utf8() {
+        let v = {
+            use std::io::Read;
+            let mut f = std::fs::File::open(fixture_invalid_utf8!()).unwrap();
+            let mut v = Vec::new();
+            f.read_to_end(&mut v).unwrap();
+            v
+        };
+        let (r, sioe) = do_execute!(["-h", "10"], &v);
+        assert_eq!(
+            buff!(sioe, serr),
+            concat!(program_name!(), ": stream did not contain valid UTF-8\n",)
+        );
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    */
 }
 
 const IN_DAT_1: &str = "\
@@ -168,7 +218,7 @@ which is always far more daring than any effort of the imagination.
 A proposition which I took the liberty of doubting.
 ";
 
-mod test_s1 {
+mod test_1_more_s {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -176,7 +226,7 @@ mod test_s1 {
     //
     #[test]
     fn test_t1() {
-        let (r, sioe) = do_execute!(&["-h", "3"], super::IN_DAT_1);
+        let (r, sioe) = do_execute!(["-h", "3"], super::IN_DAT_1);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -191,7 +241,7 @@ mod test_s1 {
     //
     #[test]
     fn test_t2() {
-        let (r, sioe) = do_execute!(&["-t", "3"], super::IN_DAT_1);
+        let (r, sioe) = do_execute!(["-t", "3"], super::IN_DAT_1);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -206,7 +256,7 @@ mod test_s1 {
     //
     #[test]
     fn test_t3() {
-        let (r, sioe) = do_execute!(&["-h", "3", "-t", "3"], super::IN_DAT_1);
+        let (r, sioe) = do_execute!(["-h", "3", "-t", "3"], super::IN_DAT_1);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -225,7 +275,7 @@ mod test_s1 {
     //
     #[test]
     fn test_t4() {
-        let (r, sioe) = do_execute!(&["-h", "9", "-t", "14", "-i"], super::IN_DAT_1);
+        let (r, sioe) = do_execute!(["-h", "9", "-t", "14", "-i"], super::IN_DAT_1);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -248,7 +298,7 @@ mod test_s2 {
     //
     #[test]
     fn test_multi_line() {
-        let (r, sioe) = do_execute!(&["-e", "a", "-f", "1"], "abcabca\noooooo\nabcabca\n");
+        let (r, sioe) = do_execute!(["-e", "a", "-f", "1"], "abcabca\noooooo\nabcabca\n");
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(buff!(sioe, sout), "1bc1bc1\noooooo\n1bc1bc1\n");
         assert!(r.is_ok());
@@ -256,7 +306,7 @@ mod test_s2 {
     //
     #[test]
     fn test_multi_line_opt_n() {
-        let (r, sioe) = do_execute!(&["-e", "a", "-f", "1", "-n"], "abcabca\noooooo\nabcabca\n");
+        let (r, sioe) = do_execute!(["-e", "a", "-f", "1", "-n"], "abcabca\noooooo\nabcabca\n");
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(buff!(sioe, sout), "1bc1bc1\n1bc1bc1\n");
         assert!(r.is_ok());
