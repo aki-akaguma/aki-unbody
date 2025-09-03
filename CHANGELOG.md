@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 * `specs`
+* more tests
 
 ### Changed
 * `IntoIterator` compatibility for args in `execute()`
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `actions/checkout@v4` in github
 
 ### Fixed
+* capacity overflow case of `-t`
 * minimum support version in doc
 * rust-version: "1.65.0"
 * clippy::derivable_impls

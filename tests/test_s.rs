@@ -605,7 +605,6 @@ mod test_4_large_numbers {
         assert!(r.is_ok());
     }
     //
-    /*
     #[test]
     fn test_tail_u64_max() {
         let input = "line1\nline2";
@@ -614,7 +613,6 @@ mod test_4_large_numbers {
         assert_eq!(buff!(sioe, sout), "line1\nline2\n");
         assert!(r.is_ok());
     }
-    */
 }
 
 mod test_4_complex_overlaps {

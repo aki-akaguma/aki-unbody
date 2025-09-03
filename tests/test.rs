@@ -589,7 +589,6 @@ mod test_4_large_numbers {
         assert!(oup.status.success());
     }
     //
-    /*
     #[test]
     fn test_tail_u64_max() {
         let input = "line1\nline2";
@@ -602,7 +601,6 @@ mod test_4_large_numbers {
         assert_eq!(oup.stdout, "line1\nline2\n");
         assert!(oup.status.success());
     }
-    */
 }
 
 mod test_4_complex_overlaps {
