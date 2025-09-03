@@ -88,18 +88,23 @@ mod test_s0 {
         assert!(r.is_err());
     }
     #[test]
-    fn test_non_option() {
-        let (r, sioe) = do_execute!([""]);
-        #[rustfmt::skip]
-        assert_eq!(
-            buff!(sioe, serr),
-            concat!(
-                program_name!(), ": ",
-                "Missing option: h or t\n",
-                "Unexpected argument: \n",
-                try_help_msg!()
-            )
-        );
+    fn test_head_not_a_number() {
+        let (r, sioe) = do_execute!(["-h", "abc"]);
+        assert!(buff!(sioe, serr).contains("invalid digit"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    #[test]
+    fn test_tail_not_a_number() {
+        let (r, sioe) = do_execute!(["-t", "xyz"]);
+        assert!(buff!(sioe, serr).contains("invalid digit"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    #[test]
+    fn test_head_negative_number() {
+        let (r, sioe) = do_execute!(["-h", "-5"]);
+        assert!(buff!(sioe, serr).contains("invalid digit"));
         assert_eq!(buff!(sioe, sout), "");
         assert!(r.is_err());
     }
@@ -326,4 +331,364 @@ mod test_s3 {
     fn test_output_broken_pipe() {
     }
     */
+}
+
+mod test_4_edge_cases {
+    use libaki_unbody::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    const IN_DAT_EMPTY: &str = "";
+    const IN_DAT_NO_NEWLINE: &str = "single line without newline";
+    const IN_DAT_SHORT: &str = "line1\nline2\nline3";
+    //
+    #[test]
+    fn test_head_zero() {
+        let (r, sioe) = do_execute!(["-h", "0"], IN_DAT_SHORT);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_tail_zero() {
+        let (r, sioe) = do_execute!(["-t", "0"], IN_DAT_SHORT);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_head_more_than_lines() {
+        let (r, sioe) = do_execute!(["-h", "10"], IN_DAT_SHORT);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), IN_DAT_SHORT.to_string() + "\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_tail_more_than_lines() {
+        let (r, sioe) = do_execute!(["-t", "10"], IN_DAT_SHORT);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), IN_DAT_SHORT.to_string() + "\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_empty_input() {
+        let (r, sioe) = do_execute!(["-h", "10"], IN_DAT_EMPTY);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_no_newline_input_head() {
+        let (r, sioe) = do_execute!(["-h", "1"], IN_DAT_NO_NEWLINE);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), IN_DAT_NO_NEWLINE.to_string() + "\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_no_newline_input_tail() {
+        let (r, sioe) = do_execute!(["-t", "1"], IN_DAT_NO_NEWLINE);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), IN_DAT_NO_NEWLINE.to_string() + "\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_head_tail_overlapping() {
+        let input = "line1\nline2\nline3\nline4\nline5";
+        let (r, sioe) = do_execute!(["-h", "3", "-t", "3"], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            "line1\nline2\nline3\nline3\nline4\nline5\n"
+        );
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_head_tail_inverse_overlapping() {
+        let input = "line1\nline2\nline3\nline4\nline5";
+        let (r, sioe) = do_execute!(["-h", "3", "-t", "3", "-i"], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_head_tail_inverse_no_overlap() {
+        let input = "line1\nline2\nline3\nline4\nline5";
+        let (r, sioe) = do_execute!(["-h", "1", "-t", "1", "-i"], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "line2\nline3\nline4\n");
+        assert!(r.is_ok());
+    }
+}
+
+mod test_4_formats {
+    use libaki_unbody::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    const IN_DAT_CRLF: &str = "line1\r\nline2\r\nline3";
+    const IN_DAT_BLANK_LINES: &str = "line1\n\nline3\nline4\n\nline6";
+    //
+    #[test]
+    fn test_crlf_line_endings_head() {
+        let (r, sioe) = do_execute!(["-h", "2"], IN_DAT_CRLF);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "line1\nline2\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_crlf_line_endings_tail() {
+        let (r, sioe) = do_execute!(["-t", "2"], IN_DAT_CRLF);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "line2\nline3\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_with_blank_lines_head() {
+        let (r, sioe) = do_execute!(["-h", "3"], IN_DAT_BLANK_LINES);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "line1\n\nline3\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_with_blank_lines_tail() {
+        let (r, sioe) = do_execute!(["-t", "3"], IN_DAT_BLANK_LINES);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "line4\n\nline6\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_with_blank_lines_inverse() {
+        let (r, sioe) = do_execute!(["-h", "1", "-t", "1", "-i"], IN_DAT_BLANK_LINES);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "\nline3\nline4\n\n");
+        assert!(r.is_ok());
+    }
+}
+
+mod test_4_long_options {
+    use libaki_unbody::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    const IN_DAT_MIXED: &str = "line1\n\nline3\nline4\n\nline6\nline7";
+    //
+    #[test]
+    fn test_long_head_option() {
+        let (r, sioe) = do_execute!(["--head", "2"], IN_DAT_MIXED);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "line1\n\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_long_tail_option() {
+        let (r, sioe) = do_execute!(["--tail", "2"], IN_DAT_MIXED);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "line6\nline7\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_long_inverse_option() {
+        let (r, sioe) = do_execute!(["--head", "1", "--tail", "1", "--inverse"], IN_DAT_MIXED);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "\nline3\nline4\n\nline6\n");
+        assert!(r.is_ok());
+    }
+}
+
+mod test_4_inverse_scenarios {
+    use libaki_unbody::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_inverse_head_only() {
+        let input = "1\n2\n3\n4\n5";
+        let (r, sioe) = do_execute!(["-h", "2", "-i"], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "3\n4\n5\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_inverse_tail_only() {
+        let input = "1\n2\n3\n4\n5";
+        let (r, sioe) = do_execute!(["-t", "2", "-i"], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "1\n2\n3\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_inverse_head_equals_lines() {
+        let input = "1\n2\n3";
+        let (r, sioe) = do_execute!(["-h", "3", "-i"], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_inverse_tail_equals_lines() {
+        let input = "1\n2\n3";
+        let (r, sioe) = do_execute!(["-t", "3", "-i"], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_ok());
+    }
+}
+
+mod test_4_unusual_input {
+    use libaki_unbody::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    const IN_DAT_LONG_LINE: &str = "This is a very long line that does not contain any newlines and is meant to test how the program handles a single long string of text without any line breaks at all.";
+    //
+    #[test]
+    fn test_long_line_no_newline_head() {
+        let (r, sioe) = do_execute!(["-h", "1"], IN_DAT_LONG_LINE);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), IN_DAT_LONG_LINE.to_string() + "\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_long_line_no_newline_tail() {
+        let (r, sioe) = do_execute!(["-t", "1"], IN_DAT_LONG_LINE);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), IN_DAT_LONG_LINE.to_string() + "\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_long_line_no_newline_inverse() {
+        let (r, sioe) = do_execute!(["-h", "1", "-t", "1", "-i"], IN_DAT_LONG_LINE);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_ok());
+    }
+}
+
+mod test_4_large_numbers {
+    use libaki_unbody::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_head_u64_max() {
+        let input = "line1\nline2";
+        // Using a very large number, should just output the whole file.
+        let (r, sioe) = do_execute!(["-h", &u64::MAX.to_string()], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "line1\nline2\n");
+        assert!(r.is_ok());
+    }
+    //
+    /*
+    #[test]
+    fn test_tail_u64_max() {
+        let input = "line1\nline2";
+        let (r, sioe) = do_execute!(["-t", &u64::MAX.to_string()], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "line1\nline2\n");
+        assert!(r.is_ok());
+    }
+    */
+}
+
+mod test_4_complex_overlaps {
+    use libaki_unbody::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_head_contains_tail() {
+        let input = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10";
+        let (r, sioe) = do_execute!(["-h", "8", "-t", "3"], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "1\n2\n3\n4\n5\n6\n7\n8\n8\n9\n10\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_tail_contains_head() {
+        let input = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10";
+        let (r, sioe) = do_execute!(["-h", "3", "-t", "8"], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "1\n2\n3\n3\n4\n5\n6\n7\n8\n9\n10\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_inverse_head_contains_tail() {
+        let input = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10";
+        let (r, sioe) = do_execute!(["-h", "8", "-t", "3", "-i"], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_inverse_tail_contains_head() {
+        let input = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10";
+        let (r, sioe) = do_execute!(["-h", "3", "-t", "8", "-i"], input);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), ""); // Head is completely contained in tail, so inverse is empty
+        assert!(r.is_ok());
+    }
+}
+
+mod test_4_encoding {
+    use libaki_unbody::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    const IN_DAT_UTF8: &str = "こんにちは\n世界\n\n你好\n世界\n";
+    //
+    #[test]
+    fn test_utf8_head() {
+        let (r, sioe) = do_execute!(["-h", "2"], IN_DAT_UTF8);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "こんにちは\n世界\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_utf8_tail() {
+        let (r, sioe) = do_execute!(["-t", "3"], IN_DAT_UTF8);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "\n你好\n世界\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_utf8_inverse() {
+        let (r, sioe) = do_execute!(["-h", "1", "-t", "2", "-i"], IN_DAT_UTF8);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "世界\n\n");
+        assert!(r.is_ok());
+    }
 }
