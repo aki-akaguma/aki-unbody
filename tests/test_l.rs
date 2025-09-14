@@ -1,47 +1,13 @@
-macro_rules! do_execute {
-    ($args:expr) => {
-        do_execute!($args, "")
-    };
-    ($args:expr, $sin:expr) => {{
-        let sioe = RunnelIoe::new(
-            Box::new(StringIn::with_str($sin)),
-            #[allow(clippy::box_default)]
-            Box::new(StringOut::default()),
-            #[allow(clippy::box_default)]
-            Box::new(StringErr::default()),
-        );
-        let program = env!("CARGO_PKG_NAME");
-        let r = execute(&sioe, &program, $args);
-        match r {
-            Ok(_) => {}
-            Err(ref err) => {
-                let _ = sioe
-                    .pg_err()
-                    .lock()
-                    .write_fmt(format_args!("{}: {}\n", program, err));
-            }
-        };
-        (r, sioe)
-    }};
-}
-
-macro_rules! buff {
-    ($sioe:expr, serr) => {
-        $sioe.pg_err().lock().buffer_to_string()
-    };
-    ($sioe:expr, sout) => {
-        $sioe.pg_out().lock().buffer_to_string()
-    };
-}
-
 #[macro_use]
 mod helper;
 
-mod test_s0 {
+#[macro_use]
+mod helper_l;
+
+mod test_0_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
-    use std::io::Write;
     //
     #[test]
     fn test_help() {
@@ -110,25 +76,16 @@ mod test_s0 {
     }
 }
 
-mod test_0_x_options_s {
+mod test_0_x_options_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::*;
     use runnel::*;
     //
     #[test]
-    fn test_x_rust_version_info() {
-        let (r, sioe) = do_execute!(["-X", "rust-version-info"]);
-        assert_eq!(buff!(sioe, serr), "");
-        assert!(!buff!(sioe, sout).is_empty());
-        assert!(r.is_ok());
-    }
-    //
-    #[test]
     fn test_x_option_help() {
         let (r, sioe) = do_execute!(["-X", "help"]);
         assert_eq!(buff!(sioe, serr), "");
-        assert!(buff!(sioe, sout).contains("Options:"));
-        assert!(buff!(sioe, sout).contains("-X rust-version-info"));
+        assert_eq!(buff!(sioe, sout), x_help_msg!());
         assert!(r.is_ok());
     }
     //
@@ -151,15 +108,14 @@ mod test_0_x_options_s {
     }
 }
 
-mod test_1_s {
+mod test_1_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
-    use std::io::Write;
     //
     #[test]
     fn test_non_option() {
-        let (r, sioe) = do_execute!([""]);
+        let (r, sioe) = do_execute!([""], "");
         #[rustfmt::skip]
         assert_eq!(
             buff!(sioe, serr),
@@ -173,17 +129,11 @@ mod test_1_s {
         assert_eq!(buff!(sioe, sout), "");
         assert!(r.is_err());
     }
-    /*
     #[test]
     fn test_invalid_utf8() {
-        let v = {
-            use std::io::Read;
-            let mut f = std::fs::File::open(fixture_invalid_utf8!()).unwrap();
-            let mut v = Vec::new();
-            f.read_to_end(&mut v).unwrap();
-            v
-        };
-        let (r, sioe) = do_execute!(["-h", "10"], &v);
+        let v = std::fs::read(fixture_invalid_utf8!()).unwrap();
+        let s = unsafe { String::from_utf8_unchecked(v) };
+        let (r, sioe) = do_execute!(["-h", "10"], &s);
         assert_eq!(
             buff!(sioe, serr),
             concat!(program_name!(), ": stream did not contain valid UTF-8\n",)
@@ -191,7 +141,6 @@ mod test_1_s {
         assert_eq!(buff!(sioe, sout), "");
         assert!(r.is_err());
     }
-    */
 }
 
 const IN_DAT_1: &str = "\
@@ -223,11 +172,10 @@ which is always far more daring than any effort of the imagination.
 A proposition which I took the liberty of doubting.
 ";
 
-mod test_1_more_s {
+mod test_1_more_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
-    use std::io::Write;
     //
     #[test]
     fn test_t1() {
@@ -295,11 +243,10 @@ mod test_1_more_s {
 }
 
 /*
-mod test_s2 {
+mod test_2_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
-    use std::io::Write;
     //
     #[test]
     fn test_multi_line() {
@@ -319,12 +266,11 @@ mod test_s2 {
 }
 */
 
-mod test_s3 {
+mod test_3_l {
     /*
     use libaki_gsub::*;
     use runnel::RunnelIoe;
     use runnel::medium::stringio::{StringIn, StringOut, StringErr};
-    use std::io::Write;
     //
      * can NOT test
     #[test]
@@ -333,11 +279,10 @@ mod test_s3 {
     */
 }
 
-mod test_4_edge_cases {
+mod test_4_edge_cases_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
-    use std::io::Write;
     //
     const IN_DAT_EMPTY: &str = "";
     const IN_DAT_NO_NEWLINE: &str = "single line without newline";
@@ -430,11 +375,10 @@ mod test_4_edge_cases {
     }
 }
 
-mod test_4_formats {
+mod test_4_formats_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
-    use std::io::Write;
     //
     const IN_DAT_CRLF: &str = "line1\r\nline2\r\nline3";
     const IN_DAT_BLANK_LINES: &str = "line1\n\nline3\nline4\n\nline6";
@@ -480,11 +424,10 @@ mod test_4_formats {
     }
 }
 
-mod test_4_long_options {
+mod test_4_long_options_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
-    use std::io::Write;
     //
     const IN_DAT_MIXED: &str = "line1\n\nline3\nline4\n\nline6\nline7";
     //
@@ -513,11 +456,10 @@ mod test_4_long_options {
     }
 }
 
-mod test_4_inverse_scenarios {
+mod test_4_inverse_scenarios_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
-    use std::io::Write;
     //
     #[test]
     fn test_inverse_head_only() {
@@ -556,11 +498,10 @@ mod test_4_inverse_scenarios {
     }
 }
 
-mod test_4_unusual_input {
+mod test_4_unusual_input_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
-    use std::io::Write;
     //
     const IN_DAT_LONG_LINE: &str = "This is a very long line that does not contain any newlines and is meant to test how the program handles a single long string of text without any line breaks at all.";
     //
@@ -589,11 +530,10 @@ mod test_4_unusual_input {
     }
 }
 
-mod test_4_large_numbers {
+mod test_4_large_numbers_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
-    use std::io::Write;
     //
     #[test]
     fn test_head_u64_max() {
@@ -615,11 +555,10 @@ mod test_4_large_numbers {
     }
 }
 
-mod test_4_complex_overlaps {
+mod test_4_complex_overlaps_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
-    use std::io::Write;
     //
     #[test]
     fn test_head_contains_tail() {
@@ -658,11 +597,10 @@ mod test_4_complex_overlaps {
     }
 }
 
-mod test_4_encoding {
+mod test_4_encoding_l {
     use libaki_unbody::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
-    use std::io::Write;
     //
     const IN_DAT_UTF8: &str = "こんにちは\n世界\n\n你好\n世界\n";
     //

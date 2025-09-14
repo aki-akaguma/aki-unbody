@@ -3,7 +3,10 @@ const TARGET_EXE_PATH: &str = env!(concat!("CARGO_BIN_EXE_", env!("CARGO_PKG_NAM
 #[macro_use]
 mod helper;
 
-mod test_0 {
+#[macro_use]
+mod helper_e;
+
+mod test_0_e {
     use exec_target::exec_target;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
@@ -74,7 +77,7 @@ mod test_0 {
     }
 }
 
-mod test_0_x_options {
+mod test_0_x_options_e {
     use exec_target::exec_target;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
@@ -82,8 +85,7 @@ mod test_0_x_options {
     fn test_x_option_help() {
         let oup = exec_target(TARGET_EXE_PATH, ["-X", "help"]);
         assert_eq!(oup.stderr, "");
-        assert!(oup.stdout.contains("Options:"));
-        assert!(oup.stdout.contains("-X rust-version-info"));
+        assert_eq!(oup.stdout, x_help_msg!());
         assert!(oup.status.success());
     }
     //
@@ -106,14 +108,13 @@ mod test_0_x_options {
     }
 }
 
-mod test_1 {
-    use exec_target::exec_target;
+mod test_1_e {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_non_option() {
-        let oup = exec_target(TARGET_EXE_PATH, [""]);
+        let oup = exec_target_with_in(TARGET_EXE_PATH, [""], b"");
         assert_eq!(
             oup.stderr,
             concat!(
@@ -130,13 +131,7 @@ mod test_1 {
     //
     #[test]
     fn test_invalid_utf8() {
-        let v = {
-            use std::io::Read;
-            let mut f = std::fs::File::open(fixture_invalid_utf8!()).unwrap();
-            let mut v = Vec::new();
-            f.read_to_end(&mut v).unwrap();
-            v
-        };
+        let v = std::fs::read(fixture_invalid_utf8!()).unwrap();
         let oup = exec_target_with_in(TARGET_EXE_PATH, ["-h", "10"], &v);
         assert_eq!(
             oup.stderr,
@@ -176,7 +171,7 @@ which is always far more daring than any effort of the imagination.
 A proposition which I took the liberty of doubting.
 ";
 
-mod test_1_more {
+mod test_1_more_e {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
@@ -254,7 +249,7 @@ mod test_1_more {
 }
 
 /*
-mod test_2 {
+mod test_2_e {
     use exec_target::exec_target_with_in;
     //use exec_target::args_from;
     const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
@@ -285,7 +280,7 @@ mod test_2 {
 } // mod test_2
 */
 
-mod test_3 {
+mod test_3_e {
     use exec_target::exec_target;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
@@ -308,7 +303,7 @@ mod test_3 {
     }
 }
 
-mod test_4_edge_cases {
+mod test_4_edge_cases_e {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
@@ -408,7 +403,7 @@ mod test_4_edge_cases {
     }
 }
 
-mod test_4_formats {
+mod test_4_formats_e {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
@@ -460,7 +455,7 @@ mod test_4_formats {
     }
 }
 
-mod test_4_long_options {
+mod test_4_long_options_e {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
@@ -495,7 +490,7 @@ mod test_4_long_options {
     }
 }
 
-mod test_4_inverse_scenarios {
+mod test_4_inverse_scenarios_e {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
@@ -536,7 +531,7 @@ mod test_4_inverse_scenarios {
     }
 }
 
-mod test_4_unusual_input {
+mod test_4_unusual_input_e {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
@@ -571,7 +566,7 @@ mod test_4_unusual_input {
     }
 }
 
-mod test_4_large_numbers {
+mod test_4_large_numbers_e {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
@@ -603,7 +598,7 @@ mod test_4_large_numbers {
     }
 }
 
-mod test_4_complex_overlaps {
+mod test_4_complex_overlaps_e {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
@@ -652,7 +647,7 @@ mod test_4_complex_overlaps {
     }
 }
 
-mod test_4_encoding {
+mod test_4_encoding_e {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
