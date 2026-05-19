@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * update crate: flood-tide(0.2.14), flood-tide-gen(0.2.2)
 * update crate: runnel(0.4.2)
 * minimum support rustc 1.68.0 (2c8cc3432 2023-03-06)
+* optimize `run_normal` to use `VecDeque` for O(1) tail buffering performance.
+* optimize `run_inverse` using a sliding window approach for better memory efficiency with large files.
 
 ### Fixed
 * `clippy::needless_borrow`
