@@ -116,11 +116,11 @@ mod test_1_l {
     #[test]
     fn test_non_option() {
         let (r, sioe) = do_execute!([""], "");
-        #[rustfmt::skip]
         assert_eq!(
             buff!(sioe, serr),
             concat!(
-                program_name!(), ": ",
+                program_name!(),
+                ": ",
                 "Missing option: h or t\n",
                 "Unexpected argument: \n",
                 try_help_msg!()

@@ -29,25 +29,29 @@ const EXAMPLES_TEXT: &str = r#"Examples:
 //}}} TEXT
 
 //----------------------------------------------------------------------
-#[rustfmt::skip]
+
 fn version_message(_program: &str) -> String {
-    format!( "{} {}",
-        env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+    format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
 }
 
-#[rustfmt::skip]
 fn usage_message(program: &str) -> String {
     format!("Usage:\n  {} {}", program, "[options]")
 }
 
-#[rustfmt::skip]
 fn help_message(program: &str) -> String {
     let ver = version_message(program);
     let usa = usage_message(env!("CARGO_PKG_NAME"));
-    [ &ver, "", &usa, DESCRIPTIONS_TEXT, OPTIONS_TEXT, EXAMPLES_TEXT].join("\n")
+    [
+        &ver,
+        "",
+        &usa,
+        DESCRIPTIONS_TEXT,
+        OPTIONS_TEXT,
+        EXAMPLES_TEXT,
+    ]
+    .join("\n")
 }
 
-#[rustfmt::skip]
 fn opt_uc_x_help_message(_program: &str) -> String {
     let z_opts = concat!(
         "Options:\n",
@@ -56,22 +60,24 @@ fn opt_uc_x_help_message(_program: &str) -> String {
     z_opts.to_string()
 }
 
-#[rustfmt::skip]
 fn opt_uc_x_package_version_info(_program: &str) -> String {
     #[cfg(feature = "debian_build")]
     {
         use std::io::Read;
         let mut string = String::new();
-        let fnm = format!("/usr/share/doc/{}/rust-version-info.txt", env!("CARGO_PKG_NAME"));
+        let fnm = format!(
+            "/usr/share/doc/{}/rust-version-info.txt",
+            env!("CARGO_PKG_NAME")
+        );
         let file = std::fs::File::open(&fnm);
         match file {
             Ok(mut f) => {
                 f.read_to_string(&mut string).unwrap();
                 string
-            },
+            }
             Err(err) => {
                 format!("ERROR: {}: '{}'", err, fnm)
-            },
+            }
         }
     }
     #[cfg(not(feature = "debian_build"))]

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * minimum support rustc 1.68.0 (2c8cc3432 2023-03-06)
 * optimize `run_normal` to use `VecDeque` for O(1) tail buffering performance.
 * optimize `run_inverse` using a sliding window approach for better memory efficiency with large files.
+* remove unjustified `#[rustfmt::skip]` attributes and apply standard `rustfmt` formatting.
 
 ### Fixed
 * `clippy::needless_borrow`
