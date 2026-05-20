@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+## [0.2.1] (2026-05-20)
 ### Changed
 * update crate: flood-tide(0.2.14), flood-tide-gen(0.2.2)
 * update crate: runnel(0.4.2)
@@ -189,7 +192,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] (2021-03-02)
 * first commit
 
-[Unreleased]: https://github.com/aki-akaguma/aki-unbody/compare/v0.2.0..HEAD
+[Unreleased]: https://github.com/aki-akaguma/aki-unbody/compare/v0.2.1..HEAD
+[0.2.1]: https://github.com/aki-akaguma/aki-unbody/compare/v0.2.0..v0.2.1
 [0.2.0]: https://github.com/aki-akaguma/aki-unbody/compare/v0.1.19..v0.2.0
 [0.1.19]: https://github.com/aki-akaguma/aki-unbody/compare/v0.1.18..v0.1.19
 [0.1.18]: https://github.com/aki-akaguma/aki-unbody/compare/v0.1.17..v0.1.18
